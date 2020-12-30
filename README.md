@@ -4,12 +4,12 @@ For years now, I have monitored the weights of my pets and myself on a monthly b
 
 # Requirements
 ## Software
-- Java 1.8 ()with language level set to _8 - Lambdas_)
+- Java 1.8 (with language level set to _8 - Lambdas_)
 - Maven 4.0.0
-- PostgreSQL 13.1 (*ensure this is running prior to using this program)
+- PostgreSQL 13.1
 ## Pre-requisite Actions
-- Before running this software, you must first create a _**weightwatcher**_ database in postgres.
-- You must provide a file titled 'postgres' within the resources directory that contains the credentials for the user that created the _**weight**_ database. The first line of the file should be the username. The second line should be the password. This information is only used to make a Java database connection (JDBC).
+- Before running this software, you must first start up PostgreSQL and create a _**weightwatcher**_ database in postgres.
+- You must provide a file titled 'postgres' within the resources directory that contains the credentials for the user that created the _**weightwatcher**_ database. The first line of the file should be the username. The second line should be the password. This information is only used to make a Java database connection (JDBC).
 
 # How to Use
 1. Run Main.java.
