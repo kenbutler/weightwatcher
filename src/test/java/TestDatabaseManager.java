@@ -1,17 +1,19 @@
 import org.testng.Assert;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-import weight_watcher.DatabaseManager;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.Connection;
+import java.net.URISyntaxException;
+import java.sql.SQLException;
 
 /**
- * Created by kenbutler on 12/28/20.
+ * Test suite for database manager
  */
 public class TestDatabaseManager {
 
-    DatabaseManager db;
+    private DatabaseManager db;
 
     @BeforeTest
     private void initialize() throws IOException {
@@ -19,7 +21,12 @@ public class TestDatabaseManager {
     }
 
     @Test
-    public void testConnection() {
+    public void testConnect() throws FileNotFoundException, URISyntaxException, SQLException {
         Assert.assertEquals(db.connect(), 0);
+    }
+
+    @AfterTest
+    private void close() throws SQLException {
+        db.close();
     }
 }

@@ -1,9 +1,8 @@
-package weight_watcher;
-
 import javax.annotation.Resources;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -28,25 +27,27 @@ public class DatabaseManager {
     private static final String TBL_WEIGHT = "Weight";
 
     // Connection
-    private String name;
+    private String dbName;
     private Connection conn;
     private Statement stmt;
     private Logger logger;
 
-    public DatabaseManager(String databaseName) throws IOException {
+    DatabaseManager(String databaseName) throws IOException {
+
+        dbName = databaseName.toLowerCase();
 
         // Initialize logger through handler and formatter
-        logger = Logger.getLogger(databaseName.substring(0, 1).toUpperCase() + databaseName.substring(1).toLowerCase() + "Log");
+        logger = Logger.getLogger(dbName.substring(0, 1).toUpperCase() + dbName.substring(1) + "Log");
 
         // Configure handler and formatter
-        FileHandler fh = new FileHandler("/tmp/" + databaseName.toLowerCase() + ".log");
+        FileHandler fh = new FileHandler("/tmp/" + dbName + ".log");
         logger.addHandler(fh);
         SimpleFormatter formatter = new SimpleFormatter();
         fh.setFormatter(formatter);
         logger.info("Logger initialized");
     }
 
-    public int connect() {
+    int connect() throws FileNotFoundException, URISyntaxException, SQLException {
 
         if (conn != null) {  // Only connect once per instance
             logger.info("Connection already exists");
@@ -54,28 +55,20 @@ public class DatabaseManager {
         }
 
         // Read Postgres user credentials from file in resources directory
-        URL filepath = this.getClass().getResource("postgres");
-        if (filepath == null) {
+        URL resource = this.getClass().getClassLoader().getResource("postgres");
+        if (resource == null) {
             logger.info("Failed to find postgres credentials");
             return -1;
         }
-        logger.info("Reading credentials from " + filepath.toString());
+        logger.info("Reading credentials from " + resource.toString());
         Scanner sc;
-        try {
-            File file = new File(filepath.toString());
-            sc = new Scanner(file);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return -2;
-        }
+        File file = new File(resource.toURI());
+        sc = new Scanner(file);
         List<String> lines = new ArrayList<String>();
         while (sc.hasNextLine()) {
             lines.add(sc.nextLine());
         }
         String[] info = lines.toArray(new String[0]);
-
-        logger.info("User is " + info[0]);
-        logger.info("PW is " + info[1]);
 
         // Set Postgres user properties
         Properties props = new Properties();
@@ -84,13 +77,8 @@ public class DatabaseManager {
         props.setProperty("sslmode", "disable");
 
         // Open a connection
-        try {
-            conn = DriverManager.getConnection("jdbc:postgresql://localhost/weight_watcher", props);
-            stmt = conn.createStatement();  // Use to execute queries
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return -3;
-        }
+        conn = DriverManager.getConnection("jdbc:postgresql://localhost/" + dbName, props);
+        stmt = conn.createStatement();  // Use to execute queries
 
         return 0;
     }
@@ -167,43 +155,24 @@ public class DatabaseManager {
     /**
      * Close database connection
      */
-    public int close() {
+    void close() throws SQLException {
 
         if (conn == null) {
             logger.info("No connection exists to close");
-            return 1;
+            return;
         }
 
         logger.info("Closing connection to database...");
 
-        int error = 0;
-
-        System.out.println("++++++++++++++++++++ MISDatabase close() ++++++++++++++++++++");
-        System.out.print("Closing connection to database...");
-
         // Close SQL statement
-        try {
-            if (stmt != null)
-                stmt.close();
-        } catch (SQLException se) {
-            error = -1;
-        }
+        if (stmt != null)
+            stmt.close();
 
         // Close connection
-        try {
-            if (conn != null)
-                conn.close();
-        } catch (SQLException se) {
-            se.printStackTrace();
-            error = -1;
-        } // End finally try
+        if (conn != null)
+            conn.close();
 
-        if (error == 0)
-            System.out.println("SUCCESS");
-        else
-            System.out.print("!! FAILURE !!");
-
-        return error;
+        logger.info("Database successfully closed");
     }
 
 }
