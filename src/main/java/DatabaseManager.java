@@ -89,67 +89,58 @@ public class DatabaseManager {
      * @param tableName Name of SQL table
      * @param sqlCreate SQL code used for creation
      */
-    private void createTable(String tableName, String sqlCreate) {
+    private void createTable(String tableName, String sqlCreate) throws SQLException {
+        // Drop table if it exists
 
-        try {
-            Statement stmt = conn.createStatement();
+        // Create table
+        System.out.print("Creating " + tableName + " table...");
+        stmt.executeUpdate(sqlCreate);
+        System.out.println("SUCCESS");
+    }
 
-            // Drop table if it exists
-            String sql = "DROP TABLE IF EXISTS " + tableName + " CASCADE;";
-            stmt.executeUpdate(sql);
+    void reset() throws SQLException {
+        String sql;
+        // TODO: Loop through a list of tables to drop/delete in the future
 
-            // Create table
-            System.out.print("Creating " + tableName + " table...");
-            stmt.executeUpdate(sqlCreate);
-            System.out.println("SUCCESS");
+        // Drop client table
+        logger.info("Dropping '" + TBL_CLIENT + "' SQL table");
+        sql = "DROP TABLE IF EXISTS " + TBL_CLIENT + " CASCADE;";
+        stmt.executeUpdate(sql);
 
-        } catch (SQLException e) {
-            System.out.println("!! FAILURE !!");
-            e.printStackTrace();
-        }
+        // Drop weight table
+        logger.info("Dropping '" + TBL_WEIGHT + "' SQL table");
+        sql = "DROP TABLE IF EXISTS " + TBL_WEIGHT + " CASCADE;";
+        stmt.executeUpdate(sql);
     }
 
     /**
      * Initialize database properties
-     *
-     * @return Integer representing success
      */
-    public int initializeTables() {
+    void initializeTables() throws SQLException {
 
-        try {
+        // Create tables
+        String tableName;
+        String sql;
 
-            // Create tables
-            String tableName;
-            String sql;
+        // Create client table
+        tableName = TBL_CLIENT;
+        sql = "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
+                "  uid UUID PRIMARY KEY UNIQUE NOT NULL, " +
+                "  name CHARACTER(30) NOT NULL, " +
+                "  species INTEGER NOT NULL " +
+                ");";
+        createTable(tableName, sql);
+        logger.info("Created '" + tableName + "' table");
 
-            // Create weight table
-            tableName = "Weight";
-            sql = "CREATE TABLE " + tableName + " (" +
-                    "  uid UUID PRIMARY KEY UNIQUE NOT NULL, " +
-                    "  name CHARACTER(30) NOT NULL, " +
-                    "  species UNSIGNED NOT NULL " +
-                    ");";
-            createTable(tableName, sql);
-
-            // Create health records table
-            tableName = "Record";
-            sql = "CREATE TABLE " + tableName + " (" +
-                    "  uid UUID PRIMARY KEY UNIQUE NOT NULL, " +
-                    "  date DATE NOT NULL " +
-                    "  weight FLOAT NOT NULL " +
-                    ");";
-            createTable(tableName, sql);
-
-        } catch (Exception e) {
-
-            // Handle errors for Class.forName
-            e.printStackTrace();
-            return -1;
-
-        }
-
-        return 0;
-
+        // Create weight table
+        tableName = TBL_WEIGHT;
+        sql = "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
+                "  uid UUID PRIMARY KEY UNIQUE NOT NULL, " +
+                "  date DATE NOT NULL, " +
+                "  weight FLOAT NOT NULL " +
+                ");";
+        createTable(tableName, sql);
+        logger.info("Created '" + tableName + "' table");
     }
 
     /**

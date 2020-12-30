@@ -23,6 +23,7 @@ public class TestDatabaseManager {
     @Test
     public void testConnect() throws FileNotFoundException, URISyntaxException, SQLException {
         Assert.assertEquals(db.connect(), 0);
+        db.initializeTables();
     }
 
     @AfterTest
