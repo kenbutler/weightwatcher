@@ -12,7 +12,7 @@ For years now, I have monitored the weights of my pets and myself on a monthly b
 - You must provide a file titled 'postgres' within the resources directory that contains the credentials for the user that created the _**weightwatcher**_ database. The first line of the file should be the username. The second line should be the password. This information is only used to make a Java database connection (JDBC).
 
 # How to Use
-1. Run Main.java.
+1. Run weightwatcher.Main.java.
 
 TODO: Add details, examples, and screenshots
 
